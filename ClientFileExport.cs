@@ -140,8 +140,8 @@ public class ClientFileExport
             }
 
             var filename = string.Format("map{0}.mul", kvp.Key);
-            var writer =
-                new BinaryFileWriter(Path.Combine(UltimaLiveSettings.UltimaLiveClientExportPath, filename), true);
+            using var file = File.OpenWrite(Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename));
+            using var writer = new MemoryMapFileWriter(file, 1024 * 1024);
             WorkMap = Map.Maps[kvp.Key];
             var CurrentMatrix = WorkMap.Tiles;
             var blocks = CurrentMatrix.BlockWidth * CurrentMatrix.BlockHeight;
@@ -164,8 +164,6 @@ public class ClientFileExport
                     }
                 }
             }
-
-            writer.Close();
         }
 
         /* Statics */
@@ -177,11 +175,11 @@ public class ClientFileExport
             }
 
             var filename = string.Format("statics{0}.mul", kvp.Key);
-            var staticWriter =
-                new BinaryFileWriter(Path.Combine(UltimaLiveSettings.UltimaLiveClientExportPath, filename), true);
+            using var staticFile = File.OpenWrite(Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename));
+            using var staticWriter = new MemoryMapFileWriter(staticFile, 1024 * 1024);
             filename = string.Format("staidx{0}.mul", kvp.Key);
-            var staticIndexWriter =
-                new BinaryFileWriter(Path.Combine(UltimaLiveSettings.UltimaLiveClientExportPath, filename), true);
+            using var staticIndexFile = File.OpenWrite(Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename));
+            using var staticIndexWriter = new MemoryMapFileWriter(staticIndexFile, 1024 * 1024);
 
             WorkMap = Map.Maps[kvp.Key];
             var CurrentMatrix = WorkMap.Tiles;
@@ -233,9 +231,6 @@ public class ClientFileExport
                     }
                 }
             }
-
-            staticWriter.Close();
-            staticIndexWriter.Close();
         }
     }
 }

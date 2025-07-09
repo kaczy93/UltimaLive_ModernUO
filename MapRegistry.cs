@@ -23,7 +23,10 @@
 #region References
 
 using System.Collections.Generic;
+using ModernUO.CodeGeneratedEvents;
 using Server;
+using Server.Mobiles;
+using Server.Network;
 using UltimaLive.Network;
 
 #endregion
@@ -81,18 +84,17 @@ public class MapRegistry
         //AddMapDefinition(32, 0, new Point2D(7168, 4096), new Point2D(5120, 4096));
         //AddMapDefinition(33, 0, new Point2D(7168, 4096), new Point2D(5120, 4096));
         //AddMapDefinition(34, 1, new Point2D(7168, 4096), new Point2D(5120, 4096));
-
-        EventSink.ServerList += EventSink_OnServerList;
-        EventSink.Login += EventSink_Login;
     }
 
-    private static void EventSink_OnServerList(ServerListEventArgs args)
+    [OnEvent(nameof(GatewayServer.ServerListEvent))]
+    public static void EventSink_OnServerList(GatewayServer.ServerListEventArgs args)
     {
-        args.State.SendLoginComplete();
+        OutgoingUltimaLivePackets.SendLoginComplete(args.State);
         args.State.SendMapDefinitions();
     }
 
-    private static void EventSink_Login(Mobile m)
+    [OnEvent(nameof(PlayerMobile.PlayerLoginEvent))]
+    public static void EventSink_Login(Mobile m)
     {
         m.NetState.SendQueryClientHash(m);
     }

@@ -268,11 +268,8 @@ public class MapChangeTracker
                 {
                     var filename = string.Format("map{0}-{1}.live", kvp.Key, Stamp);
                     Console.WriteLine(Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename));
-                    var writer =
-                        new BinaryFileWriter(
-                            Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename),
-                            true
-                        );
+                    using var file = File.OpenWrite(Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename));
+                    using var writer = new MemoryMapFileWriter(file, 1024 * 1024);
                     writer.Write((ushort)kvp.Key);
 
                     foreach (Point2D p in keyColl)
@@ -286,8 +283,6 @@ public class MapChangeTracker
                             writer.Write((sbyte)blocktiles[j].Z);
                         }
                     }
-
-                    writer.Close();
                 }
 
                 m_LandChanges[kvp.Key].Clear();
@@ -296,11 +291,8 @@ public class MapChangeTracker
                 if (keyColl.Count > 0)
                 {
                     var filename = string.Format("statics{0}-{1}.live", kvp.Key, Stamp);
-                    var writer =
-                        new BinaryFileWriter(
-                            Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename),
-                            true
-                        );
+                    using var file = File.OpenWrite(Path.Combine(UltimaLiveSettings.UltimaLiveMapChangesSavePath, filename));
+                    using var writer = new MemoryMapFileWriter(file, 1024 * 1024);
                     writer.Write((ushort)kvp.Key);
 
                     foreach (Point2D p in keyColl)
@@ -335,8 +327,6 @@ public class MapChangeTracker
                             }
                         }
                     }
-
-                    writer.Close();
                 }
 
                 m_StaticsChanges[kvp.Key].Clear();

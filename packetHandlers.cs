@@ -58,7 +58,7 @@ public class UltimaLivePacketHandlers
         IncomingPackets.Register(0x3F, 0, true, &ReceiveUltimaLiveCommand);
     }
 
-    public static void ReceiveUltimaLiveCommand(NetState state, SpanReader pvSrc, int packetLength)
+    public static void ReceiveUltimaLiveCommand(NetState state, SpanReader pvSrc)
     {
         pvSrc.Seek(13, SeekOrigin.Begin);
         byte ultimaLiveCommand = pvSrc.ReadByte();
