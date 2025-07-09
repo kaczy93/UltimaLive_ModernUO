@@ -60,7 +60,8 @@ public class UltimaLivePacketHandlers
 
     public static void ReceiveUltimaLiveCommand(NetState state, SpanReader pvSrc)
     {
-        pvSrc.Seek(13, SeekOrigin.Begin);
+        //We do not have packetid and length in pvSrc, so we Seek 10 instead of 13
+        pvSrc.Seek(10, SeekOrigin.Begin);
         byte ultimaLiveCommand = pvSrc.ReadByte();
 
         switch (ultimaLiveCommand)
@@ -73,7 +74,7 @@ public class UltimaLivePacketHandlers
 
             case 0xFE: //read client version of UltimaLive
                 {
-                    pvSrc.Seek(15, SeekOrigin.Begin);
+                    pvSrc.Seek(12, SeekOrigin.Begin);
                     ushort majorVersion = pvSrc.ReadUInt16();
                     ushort minorVersion = pvSrc.ReadUInt16();
                     Console.WriteLine(
@@ -112,20 +113,13 @@ public class UltimaLivePacketHandlers
     public static void HandleBlockQueryReply(NetState state, SpanReader pvSrc)
     {
         var from = state.Mobile;
-        //byte 000              -  cmd
-        //byte 001 through 002  -  packet size
-        pvSrc.Seek(
-            3,
-            SeekOrigin.Begin
-        ); //byte 003 through 006  -  central block number for the query (block that player is standing in)
-        uint blocknum = pvSrc.ReadUInt32();
-        uint
-            count = pvSrc
-                .ReadUInt32(); //byte 007 through 010  -  number of statics in the packet (8 for a query response)
-        //byte 011 through 012  -  UltimaLive sequence number - we sent one out, did we get it back?
-        //byte 013              -  UltimaLive command (0xFF is a block Query Response)
-        pvSrc.Seek(14, SeekOrigin.Begin); //byte 014              -  UltimaLive mapnumber
-        int mapID = pvSrc.ReadByte();
+        pvSrc.Seek(0, SeekOrigin.Begin);
+        uint blocknum = pvSrc.ReadUInt32(); //central block number for the query (block that player is standing in)
+        uint count = pvSrc.ReadUInt32(); // number of statics in the packet (8 for a query response)
+        //byte 008 through 009  -  UltimaLive sequence number - we sent one out, did we get it back?
+        //byte 010              -  UltimaLive command (0xFF is a block Query Response)
+        pvSrc.Seek(11, SeekOrigin.Begin);
+        int mapID = pvSrc.ReadByte(); // UltimaLive mapnumber
 
         if (mapID != from.Map.MapID)
         {
@@ -138,7 +132,7 @@ public class UltimaLivePacketHandlers
             return;
         }
 
-        var receivedCRCs = new ushort[25]; //byte 015 through 64   -  25 block CRCs
+        var receivedCRCs = new ushort[25];
         for (var i = 0; i < 25; i++)
         {
             receivedCRCs[i] = pvSrc.ReadUInt16();
